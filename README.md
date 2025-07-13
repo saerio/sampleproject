@@ -1,2 +1,1 @@
-# sampleproject
-a project for a CTF containing numerous faults.
+# awesome-production-project
