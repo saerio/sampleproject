@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audit Log - Hall Pass Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { background: #6c757d; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; }
+        .back-btn:hover { background: #5a6268; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+        th { background-color: #f2f2f2; position: sticky; top: 0; }
+        .audit-row { }
+        .audit-row:nth-child(even) { background-color: #f9f9f9; }
+        .action-issued { color: #28a745; }
+        .action-revoked { color: #dc3545; }
+        .action-unexcused { color: #ffc107; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Audit Log</h2>
+        <a href="{{ url_for('dashboard') }}" class="back-btn">Back to Dashboard</a>
+    </div>
+    
+    <div class="warning">
+        <strong>Notice:</strong> This audit log cannot be modified or deleted through the dashboard. All hall pass activities are permanently recorded.
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>Student</th>
+                <th>Details</th>
+                <th>Performed By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in audit_log[::-1] %}
+                <tr class="audit-row">
+                    <td>{{ entry.timestamp }}</td>
+                    <td class="action-{{ entry.action.lower().replace('_', '-') }}">{{ entry.action.replace('_', ' ') }}</td>
+                    <td>{{ entry.username }}</td>
+                    <td>{{ entry.details }}</td>
+                    <td>{{ entry.performed_by }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if not audit_log %}
+        <p>No audit entries found.</p>
+    {% endif %}
+</body>
+</html>
