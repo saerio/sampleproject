@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hall Pass Manager - Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logout-btn { background: #dc3545; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; }
+        .logout-btn:hover { background: #c82333; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .active { color: green; font-weight: bold; }
+        .inactive { color: red; }
+        .btn { padding: 6px 12px; margin: 2px; text-decoration: none; border: none; cursor: pointer; border-radius: 4px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn:hover { opacity: 0.8; }
+        .success { color: green; margin: 10px 0; }
+        .error { color: red; margin: 10px 0; }
+        .destination-input { width: 150px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Hall Pass Manager Dashboard</h2>
+        <div>
+            <span>Welcome, {{ session.username }} ({{ session.role }})</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    {% if user_role in ['admin', 'teacher'] %}
+        <div style="margin: 20px 0;">
+            {% if user_role == 'admin' %}
+                <a href="{{ url_for('audit') }}" class="btn btn-primary">View Audit Log</a>
+            {% endif %}
+        </div>
+        
+        <h3>Student Hall Pass Status</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th>Purpose</th>
+                    <th>Issued By</th>
+                    <th>Issued At</th>
+                    <th>Actions</th>
+                    {% if user_role == 'admin' %}
+                        <th>Student Page</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for username, user_data in students.items() %}
+                    {% set status = hall_passes.get(username, {'active': False, 'issued_at': None, 'issued_by': None, 'destination': None, 'purpose': None}) %}
+                    <tr>
+                        <td>{{ username }}</td>
+                        <td>
+                            {% if status.active %}
+                                <span class="active">Active</span>
+                            {% else %}
+                                <span class="inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ status.destination or '-' }}</td>
+                        <td>{{ status.purpose or '-' }}</td>
+                        <td>{{ status.issued_by or '-' }}</td>
+                        <td>{{ status.issued_at or '-' }}</td>
+                        <td>
+                            {% if status.active %}
+                                <form method="POST" action="{{ url_for('revoke_pass', username=username) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger">Revoke</button>
+                                </form>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('issue_pass', username=username) }}" style="display: inline;">
+                                    <input type="text" name="destination" placeholder="Destination" class="destination-input" required>
+                                    <input type="text" name="purpose" placeholder="Purpose" class="destination-input" required>
+                                    <button type="submit" class="btn btn-primary">Issue Pass</button>
+                                </form>
+                            {% endif %}
+                            <br><br>
+                            <form method="POST" action="{{ url_for('log_unexcused', username=username) }}" style="display: inline;">
+                                <input type="text" name="location" placeholder="Location seen" class="destination-input" required>
+                                <input type="text" name="notes" placeholder="Notes" class="destination-input">
+                                <button type="submit" class="btn btn-warning">Log Unexcused</button>
+                            </form>
+                        </td>
+                        {% if user_role == 'admin' %}
+                            <td>
+                                <a href="{{ url_for('student_status', username=username) }}" target="_blank" class="btn btn-primary">View Page</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Welcome to the Hall Pass Manager. Contact an administrator or teacher for hall pass requests.</p>
+    {% endif %}
+</body>
+</html>

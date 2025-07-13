@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hall Pass Status - {{ username }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }
+        .status-card { border: 3px solid #ddd; padding: 30px; border-radius: 10px; margin: 20px 0; }
+        .active { border-color: #28a745; background-color: #f8fff9; }
+        .inactive { border-color: #dc3545; background-color: #fff8f8; }
+        .status-text { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .active .status-text { color: #28a745; }
+        .inactive .status-text { color: #dc3545; }
+        .details { margin: 15px 0; font-size: 16px; text-align: left; }
+        .detail-item { margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; }
+        .detail-label { font-weight: bold; color: #495057; }
+        .refresh-btn { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin: 20px 0; display: inline-block; }
+        .refresh-btn:hover { background: #0056b3; }
+    </style>
+    <script>
+        // Auto-refresh every 30 seconds
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+    </script>
+</head>
+<body>
+    <h1>Hall Pass Status</h1>
+    <h2>{{ username }}</h2>
+    
+    <div class="status-card {% if status.active %}active{% else %}inactive{% endif %}">
+        <div class="status-text">
+            {% if status.active %}
+                ✓ ACTIVE HALL PASS
+            {% else %}
+                ✗ NO ACTIVE HALL PASS
+            {% endif %}
+        </div>
+        
+        {% if status.active %}
+            <div class="details">
+                <div class="detail-item">
+                    <span class="detail-label">Issued to:</span> {{ username }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Destination:</span> {{ status.destination or 'Not specified' }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Purpose:</span> {{ status.purpose or 'Not specified' }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Issued by:</span> {{ status.issued_by }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Issued at:</span> {{ status.issued_at }}
+                </div>
+            </div>
+        {% else %}
+            <div class="details">
+                <div class="detail-item">
+                    <span class="detail-label">Student:</span> {{ username }}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status:</span> No active hall pass
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <a href="javascript:location.reload()" class="refresh-btn">Refresh Status</a>
+    
+    <p><small>This page refreshes automatically every 30 seconds</small></p>
+</body>
+</html>
